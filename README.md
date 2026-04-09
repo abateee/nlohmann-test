@@ -359,7 +359,8 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/reset-referen
 
 Effet :
 
-- reinitialise l'etat logique de reference pour le prochain traitement
+- en mode offline actuel, l'endpoint est conserve pour compatibilite mais repond `501`
+- le payload retourne `accepted=false` et `error="unsupported_in_offline_mode"`
 
 ### 11.5 `POST /commands/calibrate`
 
@@ -410,6 +411,11 @@ Invoke-RestMethod `
   -ContentType "application/json" `
   -Body $payload
 ```
+
+Remarque :
+
+- un JSON mal forme retourne maintenant `HTTP 400`
+- le payload d'erreur contient `accepted=false` et `error="invalid_json"`
 
 ## 12. Envoi des evenements au backend
 
@@ -481,7 +487,11 @@ Contenu attendu :
 - `snapshot.png`
 - `calibration.json` ou `calibration.fs.json`
 - `scenario.json`
-- `expected.json`
+- `expected.json` pour le mode replay avec validation
+
+Remarque :
+
+- `expected.json` est optionnel pour le service offline quand `compare_expected = false`
 
 ### 14.1 `scenario.json`
 

@@ -327,6 +327,17 @@ build CMakeFiles\visiondarts.dir\src\app\offline_engine.cpp.obj: CXX_COMPILER__v
   TARGET_PDB = visiondarts.pdb
   TARGET_SUPPORT_DIR = CMakeFiles\visiondarts.dir
 
+build CMakeFiles\visiondarts.dir\src\app\http_service.cpp.obj: CXX_COMPILER__visiondarts_unscanned_Debug C$:\Users\pcben\Desktop\nlohmann$ test\src\app\http_service.cpp || cmake_object_order_depends_target_visiondarts
+  CONFIG = Debug
+  DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DCPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO
+  FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -std:c++17 -MDd /W4 /permissive- /EHsc
+  INCLUDES = -I"C:\Users\pcben\Desktop\nlohmann test\include" -external:IC:\Users\pcben\tools\vcpkg\installed\x64-windows\include -external:IC:\Users\pcben\tools\vcpkg\installed\x64-windows\include\opencv4 -external:W0
+  OBJECT_DIR = CMakeFiles\visiondarts.dir
+  OBJECT_FILE_DIR = CMakeFiles\visiondarts.dir\src\app
+  TARGET_COMPILE_PDB = CMakeFiles\visiondarts.dir\visiondarts.pdb
+  TARGET_PDB = visiondarts.pdb
+  TARGET_SUPPORT_DIR = CMakeFiles\visiondarts.dir
+
 build CMakeFiles\visiondarts.dir\src\app\service_controller.cpp.obj: CXX_COMPILER__visiondarts_unscanned_Debug C$:\Users\pcben\Desktop\nlohmann$ test\src\app\service_controller.cpp || cmake_object_order_depends_target_visiondarts
   CONFIG = Debug
   DEFINES = -DBROTLI_SHARED_COMPILATION -DCPPHTTPLIB_BROTLI_SUPPORT -DCPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO
@@ -346,7 +357,7 @@ build CMakeFiles\visiondarts.dir\src\app\service_controller.cpp.obj: CXX_COMPILE
 #############################################
 # Link the static library visiondarts.lib
 
-build visiondarts.lib: CXX_STATIC_LIBRARY_LINKER__visiondarts_Debug CMakeFiles\visiondarts.dir\src\core\types.cpp.obj CMakeFiles\visiondarts.dir\src\core\json_utils.cpp.obj CMakeFiles\visiondarts.dir\src\core\config.cpp.obj CMakeFiles\visiondarts.dir\src\core\board_model.cpp.obj CMakeFiles\visiondarts.dir\src\vision\calibration.cpp.obj CMakeFiles\visiondarts.dir\src\vision\replay.cpp.obj CMakeFiles\visiondarts.dir\src\vision\impact_detector.cpp.obj CMakeFiles\visiondarts.dir\src\vision\fusion_engine.cpp.obj CMakeFiles\visiondarts.dir\src\api\event_publisher.cpp.obj CMakeFiles\visiondarts.dir\src\app\offline_engine.cpp.obj CMakeFiles\visiondarts.dir\src\app\service_controller.cpp.obj
+build visiondarts.lib: CXX_STATIC_LIBRARY_LINKER__visiondarts_Debug CMakeFiles\visiondarts.dir\src\core\types.cpp.obj CMakeFiles\visiondarts.dir\src\core\json_utils.cpp.obj CMakeFiles\visiondarts.dir\src\core\config.cpp.obj CMakeFiles\visiondarts.dir\src\core\board_model.cpp.obj CMakeFiles\visiondarts.dir\src\vision\calibration.cpp.obj CMakeFiles\visiondarts.dir\src\vision\replay.cpp.obj CMakeFiles\visiondarts.dir\src\vision\impact_detector.cpp.obj CMakeFiles\visiondarts.dir\src\vision\fusion_engine.cpp.obj CMakeFiles\visiondarts.dir\src\api\event_publisher.cpp.obj CMakeFiles\visiondarts.dir\src\app\offline_engine.cpp.obj CMakeFiles\visiondarts.dir\src\app\http_service.cpp.obj CMakeFiles\visiondarts.dir\src\app\service_controller.cpp.obj
   CONFIG = Debug
   LANGUAGE_COMPILE_FLAGS = /DWIN32 /D_WINDOWS /EHsc /Zi /Ob0 /Od /RTC1 -MDd
   LINK_FLAGS = /machine:x64

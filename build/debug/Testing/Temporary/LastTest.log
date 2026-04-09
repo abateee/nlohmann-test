@@ -1,19 +1,20 @@
-Start testing: Apr 09 10:36 Europe centrale - heure d’été
+Start testing: Apr 09 10:59 Europe centrale - heure d’été
 ----------------------------------------------------------
 1/1 Testing: visiondarts_tests
 1/1 Test: visiondarts_tests
 Command: "C:/Users/pcben/Desktop/nlohmann test/build/debug/visiondarts_tests.exe"
 Directory: C:/Users/pcben/Desktop/nlohmann test/build/debug
-"visiondarts_tests" start time: Apr 09 10:36 Europe centrale - heure d’été
+"visiondarts_tests" start time: Apr 09 10:59 Europe centrale - heure d’été
 Output:
 ----------------------------------------------------------
+[ INFO:0@0.176] global registry_parallel.impl.hpp:96 cv::parallel::ParallelBackendRegistry::ParallelBackendRegistry core(parallel): Enabled backends(0, sorted by priority): N/A
 Tous les tests unitaires ont reussi.
 <end of output>
-Test time =   0.05 sec
+Test time =   1.86 sec
 ----------------------------------------------------------
 Test Passed.
-"visiondarts_tests" end time: Apr 09 10:36 Europe centrale - heure d’été
-"visiondarts_tests" time elapsed: 00:00:00
+"visiondarts_tests" end time: Apr 09 10:59 Europe centrale - heure d’été
+"visiondarts_tests" time elapsed: 00:00:01
 ----------------------------------------------------------
 
-End testing: Apr 09 10:36 Europe centrale - heure d’été
+End testing: Apr 09 10:59 Europe centrale - heure d’été
