@@ -286,13 +286,12 @@ $serviceConfig = @{
         quality_floor = 0.20
     }
     backend = @{
-        post_url = "http://127.0.0.1:3000/api/game301/joueurs"
+        post_url = "http://127.0.0.1:8080/vision/events"
         service_host = "127.0.0.1"
-        service_port = 3000
+        service_port = 8090
         post_timeout_ms = 500
         post_retry_count = 3
     }
 }
 
 Write-JsonFile -Path (Join-Path $fixturesRoot "service_config.json") -Object $serviceConfig
-
