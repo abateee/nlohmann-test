@@ -1,0 +1,6 @@
+scenario=double_20
+selected_contour_index=-1
+reason=no_plausible_contour
+tip_x=0
+tip_y=0
+contours=1

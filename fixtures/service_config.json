@@ -1,0 +1,25 @@
+﻿{
+    "backend":  {
+                    "service_port":  8090,
+                    "service_host":  "127.0.0.1",
+                    "post_retry_count":  3,
+                    "post_timeout_ms":  500,
+                    "post_url":  "http://127.0.0.1:8080/vision/events"
+                },
+    "pipeline":  {
+                     "quality_floor":  0.2,
+                     "max_contour_area":  100000,
+                     "morph_kernel_size":  3,
+                     "min_contour_area":  40,
+                     "blur_kernel_size":  5,
+                     "outlier_threshold":  0.08,
+                     "diff_threshold":  30
+                 },
+    "execution":  {
+                      "debug_output_root":  "build/debug_output",
+                      "run_all_on_start":  true,
+                      "debug_save_intermediates":  false,
+                      "scenario_root":  "fixtures",
+                      "allow_single_source":  true
+                  }
+}

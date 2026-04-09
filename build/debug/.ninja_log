@@ -1,0 +1,34 @@
+# ninja log v7
+48	3422	7969514883903343	CMakeFiles/visiondarts.dir/src/core/types.cpp.obj	d166c8d54ed9ed19
+167	3525	7969514885204419	CMakeFiles/visiondarts.dir/src/vision/fusion_engine.cpp.obj	14c5e63426aab9ac
+93	11265	7969514884430231	CMakeFiles/visiondarts.dir/src/core/board_model.cpp.obj	9728e1b6bf3d625
+78	13453	7969514884325150	CMakeFiles/visiondarts.dir/src/core/config.cpp.obj	b6bcc5189729f277
+3526	13516	7969514918797370	CMakeFiles/vision_replay.dir/apps/vision_replay.cpp.obj	f6fe4125866d2265
+65	14323	7969514884175353	CMakeFiles/visiondarts.dir/src/core/json_utils.cpp.obj	b1aaf642710bb40e
+148	15735	7969514885005499	CMakeFiles/visiondarts.dir/src/vision/impact_detector.cpp.obj	b28d92f52fb7698d
+108	16464	7969514884601670	CMakeFiles/visiondarts.dir/src/vision/calibration.cpp.obj	144de77bc0e02b9d
+204	17439	7969514885562109	CMakeFiles/visiondarts.dir/src/app/offline_engine.cpp.obj	f400ddb13bf06c31
+123	17845	7969514884769122	CMakeFiles/visiondarts.dir/src/vision/replay.cpp.obj	e47429d0be158cd2
+3431	18795	7969514917849916	CMakeFiles/visiondarts.dir/src/app/service_controller.cpp.obj	337fe19e83a43e94
+13517	22641	7969515018708878	CMakeFiles/vision_calibration_check.dir/apps/vision_calibration_check.cpp.obj	b2eff2706eae6593
+14323	23620	7969515026773998	CMakeFiles/visiondarts_tests.dir/tests/test_main.cpp.obj	e52f3973436d26cb
+186	29548	7969514885383407	CMakeFiles/visiondarts.dir/src/api/event_publisher.cpp.obj	810c2cc99447050
+13453	29857	7969515018075630	CMakeFiles/mock_backend.dir/apps/mock_backend.cpp.obj	82c03d62820b10cd
+29549	30196	7969515179011405	visiondarts.lib	ae8f598987c1d3ec
+71	781	7969516388251777	vision_calibration_check.exe	dba2da89d5ebd814
+30196	34394	7969515185490174	vision_replay.exe	5b114e4f7d725045
+30221	34449	7969515185761273	mock_backend.exe	76f06934dde81ec6
+30274	34500	7969515186271729	visiondarts_tests.exe	44e528587690d630
+11268	36212	7969514996220871	CMakeFiles/vision_service.dir/apps/vision_service.cpp.obj	f81c17e39c5dbfea
+53	812	7969516388073123	vision_service.exe	76804d65d5897171
+42	467	7969517219834277	CMakeFiles/visiondarts_runtime_dlls	7598fe59b41fd98d
+42	467	7969517219834277	C:/Users/pcben/Desktop/nlohmann test/build/debug/CMakeFiles/visiondarts_runtime_dlls	7598fe59b41fd98d
+77	4843	7969518829186565	CMakeFiles/visiondarts.dir/src/vision/impact_detector.cpp.obj	b28d92f52fb7698d
+4844	5203	7969518876856996	visiondarts.lib	ae8f598987c1d3ec
+5235	6118	7969518880770386	mock_backend.exe	76f06934dde81ec6
+5272	6166	7969518881131843	visiondarts_tests.exe	44e528587690d630
+5253	6175	7969518880948115	vision_calibration_check.exe	dba2da89d5ebd814
+5203	6431	7969518880454188	vision_replay.exe	5b114e4f7d725045
+5218	6796	7969518880594089	vision_service.exe	76804d65d5897171
+6432	7265	7969518892734073	CMakeFiles/visiondarts_runtime_dlls	7598fe59b41fd98d
+6432	7265	7969518892734073	C:/Users/pcben/Desktop/nlohmann test/build/debug/CMakeFiles/visiondarts_runtime_dlls	7598fe59b41fd98d

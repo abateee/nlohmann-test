@@ -1,0 +1,19 @@
+Start testing: Apr 09 10:36 Europe centrale - heure d’été
+----------------------------------------------------------
+1/1 Testing: visiondarts_tests
+1/1 Test: visiondarts_tests
+Command: "C:/Users/pcben/Desktop/nlohmann test/build/debug/visiondarts_tests.exe"
+Directory: C:/Users/pcben/Desktop/nlohmann test/build/debug
+"visiondarts_tests" start time: Apr 09 10:36 Europe centrale - heure d’été
+Output:
+----------------------------------------------------------
+Tous les tests unitaires ont reussi.
+<end of output>
+Test time =   0.05 sec
+----------------------------------------------------------
+Test Passed.
+"visiondarts_tests" end time: Apr 09 10:36 Europe centrale - heure d’été
+"visiondarts_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Apr 09 10:36 Europe centrale - heure d’été

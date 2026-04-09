@@ -1,0 +1,10 @@
+﻿{
+    "camera_id":  1,
+    "name":  "single_20",
+    "save_debug_images":  false,
+    "mask":  {
+                 "center_y":  400,
+                 "center_x":  400,
+                 "radius_px":  340
+             }
+}
