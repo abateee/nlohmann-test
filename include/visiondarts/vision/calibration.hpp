@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <stdexcept>
 #include <vector>
 
 #include <opencv2/core.hpp>
@@ -9,6 +10,18 @@
 
 namespace visiondarts
 {
+class CalibrationMissingError : public std::runtime_error
+{
+  public:
+    using std::runtime_error::runtime_error;
+};
+
+class CalibrationLoadError : public std::runtime_error
+{
+  public:
+    using std::runtime_error::runtime_error;
+};
+
 struct CalibrationData
 {
     int camera_id = 0;
@@ -36,4 +49,3 @@ CalibrationData compute_calibration(
 BoardPoint project_image_point(const CalibrationData& calibration, const cv::Point2d& image_point);
 cv::Point2d project_board_point_to_image(const CalibrationData& calibration, const BoardPoint& board_point);
 } // namespace visiondarts
-
