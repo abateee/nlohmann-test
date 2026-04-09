@@ -31,9 +31,9 @@ struct PipelineConfig
 
 struct BackendConfig
 {
-    std::string post_url = "http://127.0.0.1:3000/api/game301/joueurs";
+    std::string post_url = "http://127.0.0.1:8080/vision/events";
     std::string service_host = "127.0.0.1";
-    int service_port = 3000;
+    int service_port = 8090;
     int post_timeout_ms = 500;
     int post_retry_count = 3;
 };
@@ -72,4 +72,3 @@ void from_json(const nlohmann::json& j, ScenarioConfig& config);
 AppConfig load_app_config(const std::filesystem::path& path);
 ScenarioConfig load_scenario_config(const std::filesystem::path& path);
 } // namespace visiondarts
-
