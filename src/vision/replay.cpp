@@ -47,7 +47,8 @@ ReplayScenario ReplayFrameSource::load_scenario(const std::filesystem::path& sce
         throw std::runtime_error("Impossible de lire snapshot.png dans " + scenario_directory.string());
     }
 
-    if (std::filesystem::exists(scenario.expected_path))
+    scenario.has_expected_json = std::filesystem::exists(scenario.expected_path);
+    if (scenario.has_expected_json)
     {
         std::ifstream input(scenario.expected_path);
         scenario.expected_json = nlohmann::json::parse(input);
@@ -87,4 +88,3 @@ std::vector<std::filesystem::path> ReplayFrameSource::list_scenarios(const std::
     return scenarios;
 }
 } // namespace visiondarts
-

@@ -50,6 +50,18 @@ OfflineRunResult OfflineVisionEngine::run_scenario(const ReplayScenario& scenari
     run_result.scenario_directory = scenario.directory;
     run_result.scenario_name = scenario.scenario_config.name;
 
+    if (options.compare_expected && !scenario.has_expected_json)
+    {
+        VisionError error;
+        error.timestamp_ms = unix_timestamp_ms();
+        error.code = "missing_expected_fixture";
+        error.message = "expected.json manquant pour le scenario: " + scenario.expected_path.string();
+        run_result.actual_event = error;
+        run_result.matches_expected = false;
+        run_result.mismatch_path = "$/expected";
+        return run_result;
+    }
+
     const auto start_time = std::chrono::steady_clock::now();
 
     CalibrationData calibration;
@@ -59,12 +71,23 @@ OfflineRunResult OfflineVisionEngine::run_scenario(const ReplayScenario& scenari
             ? *options.calibration_override
             : CalibrationStore::load(scenario.calibration_path);
     }
-    catch (const std::exception&)
+    catch (const CalibrationMissingError&)
     {
         CalibrationRequired required;
         required.timestamp_ms = unix_timestamp_ms();
         required.missing_camera_ids = {scenario.scenario_config.camera_id};
         run_result.actual_event = required;
+        run_result.matches_expected = scenario.expected_json.empty()
+            || json_contains_expected_subset(run_result.actual_event, scenario.expected_json, 1e-3, &run_result.mismatch_path);
+        return run_result;
+    }
+    catch (const CalibrationLoadError& exception)
+    {
+        VisionError error;
+        error.timestamp_ms = unix_timestamp_ms();
+        error.code = "calibration_load_failure";
+        error.message = exception.what();
+        run_result.actual_event = error;
         run_result.matches_expected = scenario.expected_json.empty()
             || json_contains_expected_subset(run_result.actual_event, scenario.expected_json, 1e-3, &run_result.mismatch_path);
         return run_result;
@@ -153,4 +176,3 @@ OfflineRunResult OfflineVisionEngine::run_scenario(const ReplayScenario& scenari
     return run_result;
 }
 } // namespace visiondarts
-

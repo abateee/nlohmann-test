@@ -66,10 +66,10 @@ nlohmann::json ServiceController::stop()
 
 nlohmann::json ServiceController::reset_reference()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
     return nlohmann::json{
-        {"accepted", true},
-        {"message", "La reference sera rechargee au prochain traitement de scenario."},
+        {"accepted", false},
+        {"error", "unsupported_in_offline_mode"},
+        {"message", "Le mode offline ne gere pas de recapture de reference live."},
     };
 }
 
@@ -157,7 +157,10 @@ void ServiceController::worker_loop()
 
             {
                 std::lock_guard<std::mutex> lock(mutex_);
-                calibration_loaded_ = result.actual_event.value("event", std::string{}) != "calibration_required";
+                const std::string event = result.actual_event.value("event", std::string{});
+                const std::string code = result.actual_event.value("code", std::string{});
+                calibration_loaded_ = event != "calibration_required"
+                    && !(event == "vision_error" && code == "calibration_load_failure");
             }
         }
 

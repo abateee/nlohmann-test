@@ -97,4 +97,3 @@ ScenarioConfig load_scenario_config(const std::filesystem::path& path)
     return load_json_file(path).get<ScenarioConfig>();
 }
 } // namespace visiondarts
-
