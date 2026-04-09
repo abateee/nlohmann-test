@@ -23,6 +23,7 @@ add_library(visiondarts
     src/vision/fusion_engine.cpp
     src/api/event_publisher.cpp
     src/app/offline_engine.cpp
+    src/app/http_service.cpp
     src/app/service_controller.cpp
 )
 
