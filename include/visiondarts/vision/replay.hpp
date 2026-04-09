@@ -19,6 +19,7 @@ struct ReplayScenario
     std::filesystem::path scenario_path;
     std::filesystem::path expected_path;
     ScenarioConfig scenario_config{};
+    bool has_expected_json = false;
     nlohmann::json expected_json;
     cv::Mat reference_image;
     cv::Mat snapshot_image;
@@ -39,4 +40,3 @@ class ReplayFrameSource final : public IFrameSource
     std::vector<std::filesystem::path> list_scenarios(const std::filesystem::path& path) const override;
 };
 } // namespace visiondarts
-
