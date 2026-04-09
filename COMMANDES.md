@@ -66,6 +66,10 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/stop
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/reset-reference
 ```
 
+Remarque :
+
+- en mode offline actuel, cet endpoint retourne `HTTP 501`
+
 ## Calibrate
 
 ```powershell
@@ -92,6 +96,10 @@ Invoke-RestMethod `
   -ContentType "application/json" `
   -Body $payload
 ```
+
+Remarque :
+
+- un body JSON mal forme retourne `HTTP 400` avec `error = invalid_json`
 
 ## Verification calibration
 
