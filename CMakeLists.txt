@@ -59,6 +59,15 @@ target_link_libraries(mock_backend PRIVATE visiondarts)
 add_executable(vision_calibration_check apps/vision_calibration_check.cpp)
 target_link_libraries(vision_calibration_check PRIVATE visiondarts)
 
+add_executable(vision_live_calibrate apps/vision_live_calibrate.cpp)
+target_link_libraries(vision_live_calibrate PRIVATE visiondarts)
+
+add_executable(vision_live_calibrate_ui apps/vision_live_calibrate_ui.cpp)
+target_link_libraries(vision_live_calibrate_ui PRIVATE visiondarts)
+if(WIN32)
+    target_link_libraries(vision_live_calibrate_ui PRIVATE user32 gdi32)
+endif()
+
 add_executable(visiondarts_tests tests/test_main.cpp)
 target_link_libraries(visiondarts_tests PRIVATE visiondarts)
 
