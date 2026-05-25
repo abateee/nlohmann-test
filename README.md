@@ -1,25 +1,32 @@
-# Vision Darts Offline
+# Vision Darts Offline + Live Windows
 
 ## 1. Objet du projet
 
-Ce depot contient la V1 hors-ligne du moteur `C++ / OpenCV` pour un systeme de score automatique de flechettes.
+Ce depot contient le moteur `C++ / OpenCV` pour un systeme de score automatique de flechettes.
 
-Le perimetre actuel est volontairement limite a la phase **offline / replay** :
+La branche `feature/live-camera-windows` ajoute une V1 d'acquisition camera reelle Windows, tout en conservant le mode **offline / replay** existant.
 
-- pas d'acquisition camera reelle pour le moment
-- pas de Raspberry Pi pour le moment
+Le perimetre actuel est :
+
+- mode `replay` pour rejouer les fixtures existantes
+- mode `live` Windows pour ouvrir 1 a 3 cameras USB via OpenCV
+- calibration camera par fichier JSON
+- service HTTP local pour piloter le moteur
+- publication des tirs vers un backend HTTP local, notamment Flechette via `POST /vision/events`
 - pas de logique complete de partie `301` dans ce depot
-- pas de backend metier ici, seulement un `mock_backend` pour valider les echanges HTTP
+- pas de backend metier ici, seulement un `mock_backend` pour valider les echanges HTTP quand Flechette n'est pas lance
 
 Le moteur actuel sait deja faire les choses suivantes :
 
 - charger des scenarios de test a partir de paires d'images `reference + snapshot`
+- ouvrir des cameras USB configurees en mode live Windows
+- capturer une reference live par camera
 - charger une calibration par homographie
 - detecter un impact par difference d'images
 - projeter l'impact dans le repere `board_normalized`
 - calculer le score d'un tir
 - produire un JSON pret pour un backend local
-- exposer une API HTTP locale pour piloter le service offline
+- exposer une API HTTP locale pour piloter le service
 - envoyer les evenements a un backend local via HTTP
 
 ## 2. Etat actuel
@@ -33,12 +40,23 @@ L'etat du projet au moment de cette redaction est le suivant :
 - le lot de fixtures offline passe
 - l'API locale HTTP est testee
 - l'envoi vers le mock backend est teste
+- le mode live Windows compile
+- l'outil de calibration UI Windows compile
+- l'integration HTTP vers Flechette est compatible avec `POST http://127.0.0.1:3010/vision/events`
+
+Points non encore valides physiquement :
+
+- ouverture reelle de 1 a 3 cameras USB sur poste Windows
+- qualite de detection sur vraies images de cible
+- robustesse de la stabilisation apres tir reel
+- execution sur Raspberry Pi
 
 Resultats verifies :
 
 - `ctest --preset debug` : OK
 - `build/debug/vision_replay.exe fixtures` : OK
 - `mock_backend` recoit 9 evenements sur le lot de fixtures courant : OK
+- `build/debug/vision_live_calibrate_ui.exe` affiche son usage : OK
 
 ## 3. Ce qui est dans le depot
 
@@ -72,11 +90,11 @@ Resultats verifies :
 - `core`
   types metier, config, JSON, scoring
 - `vision`
-  calibration, replay, detection d'impact, fusion
+  calibration, replay, acquisition camera live, detection d'impact, fusion
 - `api`
   publication HTTP des evenements
 - `app`
-  orchestration offline et controle de service
+  orchestration replay/live et controle de service
 
 ## 4. Conventions de travail
 
@@ -86,6 +104,7 @@ Resultats verifies :
 - Les commentaires du code doivent etre rediges en francais.
 - La logique de partie `301` n'est pas geree ici.
 - Ce depot fournit un moteur `vision + scoring de tir`, pas un backend metier complet.
+- Le mode `replay` doit rester fonctionnel pendant les evolutions du mode `live`.
 
 ## 5. Documentation deja presente
 
@@ -143,7 +162,7 @@ Le fichier `vcpkg.json` declare :
 - `nlohmann-json`
 - `cpp-httplib`
 
-Le port `opencv4` est volontairement limite au minimum utile pour la phase offline.
+Le port `opencv4` inclut les modules utilises par le replay et par le live Windows : `core`, `imgproc`, `imgcodecs`, `calib3d` et `videoio`.
 
 ## 8. Build du projet
 
@@ -190,6 +209,8 @@ On y trouve notamment :
 - `vision_service.exe`
 - `mock_backend.exe`
 - `vision_calibration_check.exe`
+- `vision_live_calibrate.exe`
+- `vision_live_calibrate_ui.exe`
 - `visiondarts_tests.exe`
 
 ## 9. Si une DLL manque au lancement
@@ -247,15 +268,21 @@ Ou :
 
 Role :
 
-- lance le service HTTP local offline
+- lance le service HTTP local
 - charge une config JSON
-- traite les scenarios au travers d'une API de commande
+- traite soit les scenarios replay, soit la boucle camera live selon `execution.mode`
 - envoie les evenements vers un backend HTTP local
 
-Usage :
+Usage replay :
 
 ```powershell
 .\build\debug\vision_service.exe fixtures\service_config.json
+```
+
+Usage live Windows :
+
+```powershell
+.\build\debug\vision_service.exe config\live_windows.json
 ```
 
 ### 10.3 `mock_backend.exe`
@@ -291,9 +318,59 @@ Usage :
 .\build\debug\vision_calibration_check.exe fixtures\single_20\calibration.json 400 400 400 302
 ```
 
+### 10.5 `vision_live_calibrate_ui.exe`
+
+Role :
+
+- ouvre une camera configuree dans `config/live_windows.json`
+- affiche le flux dans une fenetre Windows native
+- permet de cliquer les 4 points de calibration
+- sauvegarde la calibration dans le fichier JSON de la camera
+
+Ordre des points :
+
+1. haut double
+2. droite double
+3. bas double
+4. gauche double
+
+Touches :
+
+- clic gauche : ajouter un point
+- `U` : annuler le dernier point
+- `R` : recommencer
+- `S` : sauvegarder quand 4 points sont poses
+- `Q` ou `ESC` : quitter
+
+Calibrer une camera :
+
+```powershell
+.\build\debug\vision_live_calibrate_ui.exe config\live_windows.json 1
+```
+
+Calibrer toutes les cameras activees :
+
+```powershell
+.\build\debug\vision_live_calibrate_ui.exe config\live_windows.json --all
+```
+
+### 10.6 `vision_live_calibrate.exe`
+
+Role :
+
+- outil CLI de secours pour capturer une image de calibration
+- demander les coordonnees des 4 points dans le terminal
+- sauvegarder la calibration sans utiliser l'UI souris
+
+Usage :
+
+```powershell
+.\build\debug\vision_live_calibrate.exe config\live_windows.json 1
+```
+
 ## 11. API HTTP locale
 
-Le service offline expose les endpoints suivants :
+Le service expose les endpoints suivants en mode `replay` et en mode `live` :
 
 - `POST /commands/start`
 - `POST /commands/stop`
@@ -315,6 +392,7 @@ Reponse typique :
 {
   "service": "vision",
   "status": "ok",
+  "mode": "live",
   "running": false,
   "state": "idle",
   "cameras_configured": 1,
@@ -335,7 +413,8 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/start
 
 Effet :
 
-- demarre le traitement du lot de scenarios configure
+- en mode `replay`, demarre le traitement du lot de scenarios configure
+- en mode `live`, ouvre les cameras si besoin, capture une reference stable et demarre la boucle de surveillance
 
 ### 11.3 `POST /commands/stop`
 
@@ -348,6 +427,7 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/stop
 Effet :
 
 - arrete proprement le worker de traitement
+- en mode `live`, libere les cameras
 
 ### 11.4 `POST /commands/reset-reference`
 
@@ -359,7 +439,8 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/reset-referen
 
 Effet :
 
-- en mode offline actuel, l'endpoint est conserve pour compatibilite mais repond `501`
+- en mode `live`, recapture une reference stable
+- en mode `replay`, l'endpoint est conserve pour compatibilite mais repond `501`
 - le payload retourne `accepted=false` et `error="unsupported_in_offline_mode"`
 
 ### 11.5 `POST /commands/calibrate`
@@ -416,16 +497,27 @@ Remarque :
 
 - un JSON mal forme retourne maintenant `HTTP 400`
 - le payload d'erreur contient `accepted=false` et `error="invalid_json"`
+- en mode `live`, la calibration est sauvegardee dans le fichier `calibration_path` de la camera concernee
+- en mode `replay`, la commande conserve le comportement de compatibilite du service offline
 
 ## 12. Envoi des evenements au backend
 
-Le service offline envoie les resultats vers :
+Le service envoie les resultats vers :
 
 ```text
 POST /vision/events
 ```
 
-L'URL est definie dans `fixtures/service_config.json`.
+L'URL est definie dans la configuration :
+
+- `fixtures/service_config.json` pour le mode replay
+- `config/live_windows.json` pour le mode live Windows
+
+Pour l'integration Flechette, l'URL attendue est :
+
+```text
+http://127.0.0.1:3010/vision/events
+```
 
 Le publisher HTTP est asynchrone :
 
@@ -433,19 +525,22 @@ Le publisher HTTP est asynchrone :
 - les envois se font dans un thread dedie
 - il y a plusieurs tentatives en cas d'echec
 
-## 13. Fichier de configuration du service
+## 13. Fichiers de configuration du service
 
-Le fichier d'exemple fourni est :
+### 13.1 Config replay
+
+Le fichier d'exemple replay est :
 
 ```text
 fixtures/service_config.json
 ```
 
-Structure actuelle :
+Structure :
 
 ```json
 {
   "execution": {
+    "mode": "replay",
     "scenario_root": "fixtures",
     "allow_single_source": true,
     "debug_save_intermediates": false,
@@ -462,7 +557,7 @@ Structure actuelle :
     "quality_floor": 0.2
   },
   "backend": {
-    "post_url": "http://127.0.0.1:8080/vision/events",
+    "post_url": "http://127.0.0.1:3010/vision/events",
     "service_host": "127.0.0.1",
     "service_port": 8090,
     "post_timeout_ms": 500,
@@ -470,6 +565,107 @@ Structure actuelle :
   }
 }
 ```
+
+### 13.2 Config live Windows
+
+Le fichier d'exemple live Windows est :
+
+```text
+config/live_windows.json
+```
+
+Exemple minimal :
+
+```json
+{
+  "execution": {
+    "mode": "live",
+    "run_all_on_start": false
+  },
+  "live": {
+    "reference_stability_frames": 5,
+    "shot_change_threshold": 8.0,
+    "stabilization_frames": 5,
+    "loop_sleep_ms": 50,
+    "min_ms_between_shots": 750
+  },
+  "cameras": [
+    {
+      "camera_id": 1,
+      "device_index": 0,
+      "width": 1280,
+      "height": 720,
+      "fps": 30,
+      "calibration_path": "config/calibration-camera-1.json",
+      "enabled": true
+    }
+  ],
+  "backend": {
+    "post_url": "http://127.0.0.1:3010/vision/events",
+    "service_host": "127.0.0.1",
+    "service_port": 8090,
+    "post_timeout_ms": 500,
+    "post_retry_count": 3
+  }
+}
+```
+
+Pour 3 cameras, ajouter 3 entrees dans `cameras` avec des `camera_id`, `device_index` et `calibration_path` distincts :
+
+```json
+{
+  "cameras": [
+    {
+      "camera_id": 1,
+      "device_index": 0,
+      "width": 1280,
+      "height": 720,
+      "fps": 30,
+      "calibration_path": "config/calibration-camera-1.json",
+      "enabled": true
+    },
+    {
+      "camera_id": 2,
+      "device_index": 1,
+      "width": 1280,
+      "height": 720,
+      "fps": 30,
+      "calibration_path": "config/calibration-camera-2.json",
+      "enabled": true
+    },
+    {
+      "camera_id": 3,
+      "device_index": 2,
+      "width": 1280,
+      "height": 720,
+      "fps": 30,
+      "calibration_path": "config/calibration-camera-3.json",
+      "enabled": true
+    }
+  ]
+}
+```
+
+### 13.3 Champs live importants
+
+- `execution.mode`
+  vaut `replay` ou `live`
+- `execution.run_all_on_start`
+  peut lancer le traitement automatiquement au demarrage du service
+- `live.reference_stability_frames`
+  nombre de frames utilisees pour capturer une reference stable
+- `live.shot_change_threshold`
+  seuil de changement global qui declenche l'analyse d'un tir
+- `live.stabilization_frames`
+  nombre de frames attendues apres changement avant de figer le snapshot
+- `live.loop_sleep_ms`
+  pause entre deux cycles de surveillance
+- `live.min_ms_between_shots`
+  garde-fou pour eviter plusieurs tirs detectes sur le meme changement
+- `cameras[].device_index`
+  index OpenCV de la camera USB Windows
+- `cameras[].calibration_path`
+  fichier JSON lu et ecrit par la calibration live
 
 ## 14. Format des fixtures offline
 
@@ -575,7 +771,9 @@ Le lot actuel contient :
 - `noise_only`
 - `ambiguous_contour`
 
-## 16. Pipeline de traitement offline
+## 16. Pipeline de traitement
+
+### 16.1 Pipeline replay
 
 Le pipeline applique les etapes suivantes :
 
@@ -593,6 +791,23 @@ Le pipeline applique les etapes suivantes :
 12. fusion des impacts
 13. scoring
 14. emission d'un JSON final
+
+### 16.2 Pipeline live Windows
+
+Le pipeline live applique les etapes suivantes :
+
+1. ouverture des cameras activees dans `config/live_windows.json`
+2. chargement des calibrations JSON par camera
+3. capture d'une reference stable par camera
+4. surveillance automatique des frames courantes
+5. detection d'un changement significatif par difference reference/snapshot
+6. attente de stabilisation de la scene
+7. detection d'impact par camera
+8. projection des impacts valides en `board_normalized`
+9. fusion multi-camera
+10. scoring
+11. publication du JSON `shot_detected` ou `shot_invalid`
+12. attente de retour stable, puis renouvellement de la reference
 
 ## 17. Heuristique actuelle de detection
 
@@ -747,6 +962,58 @@ Ensuite verifier :
 - `build/mock_backend_events.jsonl`
 - ou le stdout du `mock_backend`
 
+### 21.3 Validation live Windows avec Flechette
+
+Terminal 1, demarrer Flechette :
+
+```powershell
+cd "C:\Users\pcben\Desktop\Flechettes API\flechette\API\joueur"
+npm start
+```
+
+Terminal 2, lancer le service vision live :
+
+```powershell
+cd "C:\Users\pcben\Desktop\nlohmann test"
+.\build\debug\vision_service.exe config\live_windows.json
+```
+
+Terminal 3, verifier puis demarrer :
+
+```powershell
+Invoke-RestMethod -Uri http://127.0.0.1:8090/healthcheck
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/reset-reference
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/start
+```
+
+Verifier cote Flechette :
+
+- `GET /api/vision/health` doit repondre cote backend Flechette
+- un tir recu doit creer une ligne dans `lancers`
+- `payload_json` doit contenir le JSON complet emis par ce service
+
+### 21.4 Calibration live Windows
+
+Apres branchement des cameras, calibrer chaque camera :
+
+```powershell
+.\build\debug\vision_live_calibrate_ui.exe config\live_windows.json --all
+```
+
+Ou une seule camera :
+
+```powershell
+.\build\debug\vision_live_calibrate_ui.exe config\live_windows.json 1
+```
+
+Ensuite verifier que les fichiers suivants existent selon la config :
+
+```text
+config/calibration-camera-1.json
+config/calibration-camera-2.json
+config/calibration-camera-3.json
+```
+
 ## 22. Debug visuel
 
 Quand le mode debug est active, le moteur peut sauvegarder :
@@ -779,26 +1046,31 @@ build/debug_output
 ### 23.2 Vision
 
 - `include/visiondarts/vision/calibration.hpp`
+- `include/visiondarts/vision/live_camera_source.hpp`
 - `src/vision/calibration.cpp`
+- `src/vision/live_camera_source.cpp`
 - `src/vision/replay.cpp`
 - `src/vision/impact_detector.cpp`
 - `src/vision/fusion_engine.cpp`
 
 ### 23.3 Application
 
+- `include/visiondarts/app/live_engine.hpp`
+- `src/app/live_engine.cpp`
 - `src/app/offline_engine.cpp`
 - `src/app/service_controller.cpp`
 - `src/api/event_publisher.cpp`
 
 ## 24. Limitations actuelles
 
-- pas de camera physique
-- pas de synchro multi-camera reelle
-- pas de `CameraFrameSource`
+- camera live Windows implementee mais pas encore validee physiquement avec le materiel final
+- support cible V1 de 1 a 3 cameras USB configurees
+- pas de synchronisation materielle entre cameras
 - pas de Raspberry Pi
 - pas de logique complete de partie `301`
 - heuristiques de vision encore simples
 - fixtures surtout synthetiques a ce stade
+- calibration manuelle/semi-automatique par clic souris, pas encore auto-calibration complete
 
 ## 25. Suite logique du projet
 
@@ -806,14 +1078,15 @@ Les prochaines etapes naturelles seront :
 
 - enrichir les fixtures
 - durcir le detecteur sur de vraies images
-- introduire l'acquisition camera reelle
-- valider la multi-camera
-- integrer le backend reel du collegue
+- valider l'acquisition camera reelle sur Windows
+- valider la multi-camera 2 puis 3 cameras
+- mesurer les seuils live sur une vraie cible
+- integrer et tester le flux complet avec Flechette en partie 301
 - preparer la cible Raspberry Pi
 
 ## 26. Resume court
 
-Si tu veux juste lancer le projet rapidement :
+Si tu veux juste valider le replay rapidement :
 
 ```powershell
 .\tools\build_debug.ps1 -RunTests
@@ -823,3 +1096,14 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/start
 ```
 
 Le moteur traitera alors le lot de fixtures offline et enverra les JSON de tir au mock backend local.
+
+Si tu veux lancer le live Windows :
+
+```powershell
+.\tools\build_debug.ps1 -RunTests
+.\build\debug\vision_live_calibrate_ui.exe config\live_windows.json --all
+.\build\debug\vision_service.exe config\live_windows.json
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/start
+```
+
+Le service ouvrira les cameras configurees, utilisera les calibrations JSON et publiera les tirs vers l'URL `backend.post_url`.
