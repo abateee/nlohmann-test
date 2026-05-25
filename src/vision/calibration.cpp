@@ -1,6 +1,7 @@
 #include "visiondarts/vision/calibration.hpp"
 
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <stdexcept>
 
@@ -105,6 +106,36 @@ CalibrationData CalibrationStore::load(const std::filesystem::path& path)
         throw CalibrationLoadError("Calibration FileStorage invalide: " + path.string());
     }
     return calibration;
+}
+
+void CalibrationStore::save_json(const std::filesystem::path& path, const CalibrationData& calibration)
+{
+    if (path.has_parent_path())
+    {
+        std::filesystem::create_directories(path.parent_path());
+    }
+
+    nlohmann::json json;
+    json["camera_id"] = calibration.camera_id;
+    json["offset_angle_deg"] = calibration.offset_angle_deg;
+    json["points_image"] = nlohmann::json::array();
+    json["points_board"] = nlohmann::json::array();
+
+    for (const auto& point : calibration.points_image)
+    {
+        json["points_image"].push_back({{"x", point.x}, {"y", point.y}});
+    }
+    for (const auto& point : calibration.points_board)
+    {
+        json["points_board"].push_back({{"x", point.x}, {"y", point.y}});
+    }
+
+    std::ofstream output(path);
+    if (!output)
+    {
+        throw std::runtime_error("Impossible d'ecrire la calibration JSON: " + path.string());
+    }
+    output << json.dump(2) << '\n';
 }
 
 void CalibrationStore::save_file_storage_json(const std::filesystem::path& path, const CalibrationData& calibration)

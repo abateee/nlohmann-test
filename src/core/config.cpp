@@ -21,6 +21,7 @@ nlohmann::json load_json_file(const std::filesystem::path& path)
 
 void from_json(const nlohmann::json& j, ExecutionConfig& config)
 {
+    config.mode = j.value("mode", std::string{"replay"});
     config.scenario_root = j.value("scenario_root", std::string{"fixtures"});
     config.allow_single_source = j.value("allow_single_source", true);
     config.debug_save_intermediates = j.value("debug_save_intermediates", false);
@@ -48,6 +49,37 @@ void from_json(const nlohmann::json& j, BackendConfig& config)
     config.post_retry_count = j.value("post_retry_count", 3);
 }
 
+void from_json(const nlohmann::json& j, MaskCircle& mask)
+{
+    mask.center_x = j.at("center_x").get<int>();
+    mask.center_y = j.at("center_y").get<int>();
+    mask.radius_px = j.at("radius_px").get<int>();
+}
+
+void from_json(const nlohmann::json& j, LiveCameraConfig& config)
+{
+    config.camera_id = j.value("camera_id", 1);
+    config.device_index = j.value("device_index", 0);
+    config.width = j.value("width", 0);
+    config.height = j.value("height", 0);
+    config.fps = j.value("fps", 0);
+    config.calibration_path = j.value("calibration_path", std::string{"config/calibration-camera-1.json"});
+    config.enabled = j.value("enabled", true);
+    if (j.contains("mask"))
+    {
+        config.mask = j.at("mask").get<MaskCircle>();
+    }
+}
+
+void from_json(const nlohmann::json& j, LiveConfig& config)
+{
+    config.reference_stability_frames = j.value("reference_stability_frames", 5);
+    config.shot_change_threshold = j.value("shot_change_threshold", 8.0);
+    config.stabilization_frames = j.value("stabilization_frames", 5);
+    config.loop_sleep_ms = j.value("loop_sleep_ms", 50);
+    config.min_ms_between_shots = j.value("min_ms_between_shots", 750);
+}
+
 void from_json(const nlohmann::json& j, AppConfig& config)
 {
     if (j.contains("execution"))
@@ -62,13 +94,14 @@ void from_json(const nlohmann::json& j, AppConfig& config)
     {
         config.backend = j.at("backend").get<BackendConfig>();
     }
-}
-
-void from_json(const nlohmann::json& j, MaskCircle& mask)
-{
-    mask.center_x = j.at("center_x").get<int>();
-    mask.center_y = j.at("center_y").get<int>();
-    mask.radius_px = j.at("radius_px").get<int>();
+    if (j.contains("live"))
+    {
+        config.live = j.at("live").get<LiveConfig>();
+    }
+    if (j.contains("cameras"))
+    {
+        config.cameras = j.at("cameras").get<std::vector<LiveCameraConfig>>();
+    }
 }
 
 void from_json(const nlohmann::json& j, ScenarioConfig& config)

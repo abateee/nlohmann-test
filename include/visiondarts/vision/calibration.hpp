@@ -37,6 +37,7 @@ class CalibrationStore
 {
   public:
     static CalibrationData load(const std::filesystem::path& path);
+    static void save_json(const std::filesystem::path& path, const CalibrationData& calibration);
     static void save_file_storage_json(const std::filesystem::path& path, const CalibrationData& calibration);
 };
 

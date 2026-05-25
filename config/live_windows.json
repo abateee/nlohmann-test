@@ -1,0 +1,43 @@
+{
+  "execution": {
+    "mode": "live",
+    "allow_single_source": true,
+    "debug_save_intermediates": false,
+    "debug_output_root": "build/debug_output",
+    "run_all_on_start": false
+  },
+  "pipeline": {
+    "diff_threshold": 30,
+    "blur_kernel_size": 5,
+    "morph_kernel_size": 3,
+    "min_contour_area": 40,
+    "max_contour_area": 100000,
+    "outlier_threshold": 0.08,
+    "quality_floor": 0.2
+  },
+  "live": {
+    "reference_stability_frames": 5,
+    "shot_change_threshold": 8.0,
+    "stabilization_frames": 5,
+    "loop_sleep_ms": 50,
+    "min_ms_between_shots": 750
+  },
+  "backend": {
+    "post_url": "http://127.0.0.1:3010/vision/events",
+    "service_host": "127.0.0.1",
+    "service_port": 8090,
+    "post_timeout_ms": 500,
+    "post_retry_count": 3
+  },
+  "cameras": [
+    {
+      "camera_id": 1,
+      "device_index": 0,
+      "width": 1280,
+      "height": 720,
+      "fps": 30,
+      "calibration_path": "config/calibration-camera-1.json",
+      "enabled": true
+    }
+  ]
+}

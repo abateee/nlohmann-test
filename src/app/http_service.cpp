@@ -41,8 +41,12 @@ void register_service_routes(httplib::Server& server, ServiceController& control
     });
 
     server.Post("/commands/reset-reference", [&](const httplib::Request&, httplib::Response& response) {
-        response.status = 501;
-        response.set_content(controller.reset_reference().dump(2), "application/json");
+        const auto body = controller.reset_reference();
+        if (!body.value("accepted", false) && body.value("error", std::string{}) == "unsupported_in_offline_mode")
+        {
+            response.status = 501;
+        }
+        response.set_content(body.dump(2), "application/json");
     });
 
     server.Post("/commands/calibrate", [&](const httplib::Request& request, httplib::Response& response) {

@@ -11,6 +11,7 @@ namespace visiondarts
 {
 struct ExecutionConfig
 {
+    std::string mode = "replay";
     std::filesystem::path scenario_root = "fixtures";
     bool allow_single_source = true;
     bool debug_save_intermediates = false;
@@ -38,18 +39,41 @@ struct BackendConfig
     int post_retry_count = 3;
 };
 
-struct AppConfig
-{
-    ExecutionConfig execution{};
-    PipelineConfig pipeline{};
-    BackendConfig backend{};
-};
-
 struct MaskCircle
 {
     int center_x = 0;
     int center_y = 0;
     int radius_px = 0;
+};
+
+struct LiveCameraConfig
+{
+    int camera_id = 1;
+    int device_index = 0;
+    int width = 0;
+    int height = 0;
+    int fps = 0;
+    std::filesystem::path calibration_path = "config/calibration-camera-1.json";
+    bool enabled = true;
+    std::optional<MaskCircle> mask;
+};
+
+struct LiveConfig
+{
+    int reference_stability_frames = 5;
+    double shot_change_threshold = 8.0;
+    int stabilization_frames = 5;
+    int loop_sleep_ms = 50;
+    int min_ms_between_shots = 750;
+};
+
+struct AppConfig
+{
+    ExecutionConfig execution{};
+    PipelineConfig pipeline{};
+    BackendConfig backend{};
+    LiveConfig live{};
+    std::vector<LiveCameraConfig> cameras{};
 };
 
 struct ScenarioConfig
@@ -65,6 +89,8 @@ struct ScenarioConfig
 void from_json(const nlohmann::json& j, ExecutionConfig& config);
 void from_json(const nlohmann::json& j, PipelineConfig& config);
 void from_json(const nlohmann::json& j, BackendConfig& config);
+void from_json(const nlohmann::json& j, LiveCameraConfig& config);
+void from_json(const nlohmann::json& j, LiveConfig& config);
 void from_json(const nlohmann::json& j, AppConfig& config);
 void from_json(const nlohmann::json& j, MaskCircle& mask);
 void from_json(const nlohmann::json& j, ScenarioConfig& config);

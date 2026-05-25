@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(OpenCV REQUIRED COMPONENTS core imgproc imgcodecs calib3d)
+find_package(OpenCV REQUIRED COMPONENTS core imgproc imgcodecs calib3d videoio)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(httplib CONFIG REQUIRED)
 
@@ -19,10 +19,12 @@ add_library(visiondarts
     src/core/board_model.cpp
     src/vision/calibration.cpp
     src/vision/replay.cpp
+    src/vision/live_camera_source.cpp
     src/vision/impact_detector.cpp
     src/vision/fusion_engine.cpp
     src/api/event_publisher.cpp
     src/app/offline_engine.cpp
+    src/app/live_engine.cpp
     src/app/http_service.cpp
     src/app/service_controller.cpp
 )
