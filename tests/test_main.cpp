@@ -28,7 +28,7 @@ void expect(bool condition, const std::string& message)
 {
     if (!condition)
     {
-        throw std::runtime_error(message);
+        throw std::runtime_error(message); // error handling simple 
     }
 }
 
@@ -36,7 +36,7 @@ void expect_near(double actual, double expected, double tolerance, const std::st
 {
     if (std::abs(actual - expected) > tolerance)
     {
-        throw std::runtime_error(message);
+        throw std::runtime_error(message); // encore
     }
 }
 
@@ -192,6 +192,56 @@ void test_backend_defaults()
     expect(parsed_defaults.service_port == direct_defaults.service_port, "Le service_port par defaut diverge entre construction et parsing JSON.");
     expect(parsed_defaults.post_timeout_ms == direct_defaults.post_timeout_ms, "Le timeout par defaut diverge entre construction et parsing JSON.");
     expect(parsed_defaults.post_retry_count == direct_defaults.post_retry_count, "Le retry_count par defaut diverge entre construction et parsing JSON.");
+}
+
+void test_live_config_parsing()
+{
+    const auto replay_config = nlohmann::json::object().get<visiondarts::AppConfig>();
+    expect(replay_config.execution.mode == "replay", "Le mode par defaut doit rester replay.");
+    expect(replay_config.live.reference_stability_frames == 5, "Le nombre de frames de reference par defaut est incorrect.");
+    expect(replay_config.live.shot_change_threshold == 8.0, "Le seuil de changement live par defaut est incorrect.");
+    expect(replay_config.cameras.empty(), "La config par defaut ne doit pas forcer de camera explicite.");
+
+    const nlohmann::json live_json = {
+        {"execution", {{"mode", "live"}, {"run_all_on_start", false}}},
+        {"live", {
+            {"reference_stability_frames", 7},
+            {"shot_change_threshold", 12.5},
+            {"stabilization_frames", 4},
+            {"loop_sleep_ms", 33},
+            {"min_ms_between_shots", 900},
+        }},
+        {"cameras", nlohmann::json::array({
+            {
+                {"camera_id", 2},
+                {"device_index", 1},
+                {"width", 1280},
+                {"height", 720},
+                {"fps", 30},
+                {"calibration_path", "config/calibration-camera-2.json"},
+                {"enabled", true},
+                {"mask", {{"center_x", 640}, {"center_y", 360}, {"radius_px", 320}}},
+            },
+        })},
+    };
+
+    const auto live_config = live_json.get<visiondarts::AppConfig>();
+    expect(live_config.execution.mode == "live", "Le mode live n'est pas parse correctement.");
+    expect(!live_config.execution.run_all_on_start, "run_all_on_start live devrait etre false dans ce test.");
+    expect(live_config.live.reference_stability_frames == 7, "reference_stability_frames n'est pas parse.");
+    expect(live_config.live.shot_change_threshold == 12.5, "shot_change_threshold n'est pas parse.");
+    expect(live_config.live.stabilization_frames == 4, "stabilization_frames n'est pas parse.");
+    expect(live_config.live.loop_sleep_ms == 33, "loop_sleep_ms n'est pas parse.");
+    expect(live_config.live.min_ms_between_shots == 900, "min_ms_between_shots n'est pas parse.");
+    expect(live_config.cameras.size() == 1, "La liste cameras live n'est pas parse.");
+    expect(live_config.cameras.front().camera_id == 2, "camera_id live incorrect.");
+    expect(live_config.cameras.front().device_index == 1, "device_index live incorrect.");
+    expect(live_config.cameras.front().width == 1280, "width live incorrect.");
+    expect(live_config.cameras.front().height == 720, "height live incorrect.");
+    expect(live_config.cameras.front().fps == 30, "fps live incorrect.");
+    expect(live_config.cameras.front().calibration_path == std::filesystem::path("config/calibration-camera-2.json"), "calibration_path live incorrect.");
+    expect(live_config.cameras.front().mask.has_value(), "mask live devrait etre parse.");
+    expect(live_config.cameras.front().mask->radius_px == 320, "mask radius live incorrect.");
 }
 
 void test_json_subset()
@@ -380,6 +430,7 @@ int main()
     {
         test_score_engine();
         test_backend_defaults();
+        test_live_config_parsing();
         test_json_subset();
         test_calibration_projection();
         test_fusion_engine();
