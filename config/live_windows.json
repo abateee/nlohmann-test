@@ -38,6 +38,24 @@
       "fps": 30,
       "calibration_path": "config/calibration-camera-1.json",
       "enabled": true
+    },
+    {
+      "camera_id": 2,
+      "device_index": 1,
+      "width": 1280,
+      "height": 720,
+      "fps": 30,
+      "calibration_path": "config/calibration-camera-2.json",
+      "enabled": true
+    },
+    {
+      "camera_id": 3,
+      "device_index": 2,
+      "width": 1280,
+      "height": 720,
+      "fps": 30,
+      "calibration_path": "config/calibration-camera-3.json",
+      "enabled": true
     }
   ]
 }

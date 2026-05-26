@@ -1,6 +1,7 @@
 #include "visiondarts/core/config.hpp"
 
 #include <fstream>
+#include <set>
 #include <stdexcept>
 
 namespace visiondarts
@@ -16,6 +17,67 @@ nlohmann::json load_json_file(const std::filesystem::path& path)
     }
 
     return nlohmann::json::parse(input);
+}
+
+int enabled_camera_count(const std::vector<LiveCameraConfig>& cameras)
+{
+    int count = 0;
+    for (const auto& camera : cameras)
+    {
+        if (camera.enabled)
+        {
+            ++count;
+        }
+    }
+    return count;
+}
+
+void validate_live_config(const AppConfig& config)
+{
+    if (config.execution.mode != "live")
+    {
+        return;
+    }
+
+    const int enabled_count = enabled_camera_count(config.cameras);
+    if (enabled_count < 1)
+    {
+        throw std::runtime_error("La config live doit activer au moins une camera.");
+    }
+    if (enabled_count > 3)
+    {
+        throw std::runtime_error("La config live supporte au maximum 3 cameras actives.");
+    }
+
+    std::set<int> camera_ids;
+    std::set<int> device_indexes;
+    for (const auto& camera : config.cameras)
+    {
+        if (!camera.enabled)
+        {
+            continue;
+        }
+        if (camera.camera_id <= 0)
+        {
+            throw std::runtime_error("camera_id live doit etre strictement positif.");
+        }
+        if (camera.device_index < 0)
+        {
+            throw std::runtime_error("device_index live doit etre positif ou nul.");
+        }
+        if (!camera_ids.insert(camera.camera_id).second)
+        {
+            throw std::runtime_error("camera_id live duplique: " + std::to_string(camera.camera_id));
+        }
+        if (!device_indexes.insert(camera.device_index).second)
+        {
+            throw std::runtime_error("device_index live duplique: " + std::to_string(camera.device_index));
+        }
+        if (camera.calibration_path.empty())
+        {
+            throw std::runtime_error("calibration_path live manquant pour camera_id=" + std::to_string(camera.camera_id));
+        }
+    }
 }
 } // namespace
 
@@ -102,6 +164,7 @@ void from_json(const nlohmann::json& j, AppConfig& config)
     {
         config.cameras = j.at("cameras").get<std::vector<LiveCameraConfig>>();
     }
+    validate_live_config(config);
 }
 
 void from_json(const nlohmann::json& j, ScenarioConfig& config)

@@ -9,6 +9,27 @@
 
 namespace visiondarts
 {
+namespace
+{
+int count_enabled_live_cameras(const std::vector<LiveCameraConfig>& cameras)
+{
+    if (cameras.empty())
+    {
+        return 1;
+    }
+
+    int count = 0;
+    for (const auto& camera : cameras)
+    {
+        if (camera.enabled)
+        {
+            ++count;
+        }
+    }
+    return count;
+}
+} // namespace
+
 ServiceController::ServiceController(AppConfig config)
     : config_(std::move(config))
     , engine_(config_.pipeline)
@@ -19,7 +40,7 @@ ServiceController::ServiceController(AppConfig config)
         set_last_error(message);
     });
     cameras_configured_ = config_.execution.mode == "live"
-        ? static_cast<int>(config_.cameras.empty() ? 1 : config_.cameras.size())
+        ? count_enabled_live_cameras(config_.cameras)
         : 1;
     publisher_.start();
 }

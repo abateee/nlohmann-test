@@ -574,7 +574,14 @@ Le fichier d'exemple live Windows est :
 config/live_windows.json
 ```
 
-Exemple minimal :
+La config fournie dans cette branche est prete pour 3 cameras USB Windows :
+
+- camera logique `1` sur `device_index` 0
+- camera logique `2` sur `device_index` 1
+- camera logique `3` sur `device_index` 2
+- calibrations separees dans `config/calibration-camera-1.json`, `2` et `3`
+
+Exemple minimal 1 camera :
 
 ```json
 {
@@ -610,7 +617,7 @@ Exemple minimal :
 }
 ```
 
-Pour 3 cameras, ajouter 3 entrees dans `cameras` avec des `camera_id`, `device_index` et `calibration_path` distincts :
+Exemple 3 cameras :
 
 ```json
 {
@@ -666,6 +673,9 @@ Pour 3 cameras, ajouter 3 entrees dans `cameras` avec des `camera_id`, `device_i
   index OpenCV de la camera USB Windows
 - `cameras[].calibration_path`
   fichier JSON lu et ecrit par la calibration live
+- en mode `live`, la config doit avoir entre 1 et 3 cameras actives
+- les `camera_id` actifs doivent etre uniques
+- les `device_index` actifs doivent etre uniques
 
 ## 14. Format des fixtures offline
 
