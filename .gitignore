@@ -1,0 +1,36 @@
+# Build outputs
+/build/
+/out/
+
+# Runtime/debug outputs
+*.exe
+*.dll
+*.ilk
+*.pdb
+*.obj
+*.lib
+*.exp
+*.log
+*.jsonl
+
+# CMake/Ninja generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+DartConfiguration.tcl
+Testing/
+.ninja_deps
+.ninja_log
+build.ninja
+
+# Local calibration/runtime files
+/config/calibration-camera-*.json
+/config/*.local.json
+
+# Editor/OS noise
+.vs/
+.vscode/
+*.user
+Thumbs.db
+Desktop.ini
