@@ -141,18 +141,37 @@ Le projet s'appuie sur :
 - `nlohmann::json`
 - `cpp-httplib`
 
-### 6.3 Hypotheses actuelles sur cette machine
+### 6.3 Installation Windows
 
-Les scripts fournis supposent les chemins suivants :
+Le script de verification local est :
 
-- `C:\BuildTools\Common7\Tools\VsDevCmd.bat`
-- `C:\Users\pcben\tools\cmake\bin\cmake.exe`
-- `C:\Users\pcben\tools\vcpkg\installed\x64-windows`
+```powershell
+.\tools\setup_windows.ps1
+```
 
-Si ces chemins changent, il faudra ajuster :
+Pour installer les dependances declarees dans `vcpkg.json` :
 
-- `tools/build_debug.ps1`
-- `CMakePresets.json`
+```powershell
+.\tools\setup_windows.ps1 -InstallDeps
+```
+
+Il verifie :
+
+- Visual Studio Build Tools
+- CMake
+- Ninja
+- `VCPKG_ROOT`
+- le triplet `x64-windows`
+
+Les chemins peuvent etre fournis par variables d'environnement :
+
+```powershell
+$env:VISIONDARTS_VSDEVCMD="C:\...\VsDevCmd.bat"
+$env:VISIONDARTS_CMAKE="C:\...\cmake.exe"
+$env:VCPKG_ROOT="C:\...\vcpkg"
+```
+
+`CMakePresets.json` utilise `VCPKG_ROOT` pour trouver OpenCV et les dependances vcpkg.
 
 ## 7. Dependances vcpkg
 
@@ -209,6 +228,7 @@ On y trouve notamment :
 - `vision_service.exe`
 - `mock_backend.exe`
 - `vision_calibration_check.exe`
+- `vision_camera_diagnostics.exe`
 - `vision_live_calibrate.exe`
 - `vision_live_calibrate_ui.exe`
 - `visiondarts_tests.exe`
@@ -318,7 +338,34 @@ Usage :
 .\build\debug\vision_calibration_check.exe fixtures\single_20\calibration.json 400 400 400 302
 ```
 
-### 10.5 `vision_live_calibrate_ui.exe`
+### 10.5 `vision_camera_diagnostics.exe`
+
+Role :
+
+- verifier que Windows/OpenCV voit les cameras USB
+- tester les cameras configurees dans `config/live_windows.json`
+- capturer une image par camera dans `build/camera_diagnostics`
+- produire un rapport `camera_diagnostics.json`
+
+Tester la config 3 cameras :
+
+```powershell
+.\build\debug\vision_camera_diagnostics.exe config\live_windows.json
+```
+
+Scanner les index OpenCV de `0` a `10` :
+
+```powershell
+.\build\debug\vision_camera_diagnostics.exe --scan 10
+```
+
+Tester la config et scanner en meme temps :
+
+```powershell
+.\build\debug\vision_camera_diagnostics.exe config\live_windows.json --scan 10
+```
+
+### 10.6 `vision_live_calibrate_ui.exe`
 
 Role :
 
@@ -354,7 +401,7 @@ Calibrer toutes les cameras activees :
 .\build\debug\vision_live_calibrate_ui.exe config\live_windows.json --all
 ```
 
-### 10.6 `vision_live_calibrate.exe`
+### 10.7 `vision_live_calibrate.exe`
 
 Role :
 
@@ -974,6 +1021,18 @@ Ensuite verifier :
 
 ### 21.3 Validation live Windows avec Flechette
 
+Avant de calibrer ou lancer le service live, verifier que les cameras sont bien visibles :
+
+```powershell
+.\build\debug\vision_camera_diagnostics.exe config\live_windows.json
+```
+
+Le rapport et les captures sont ecrits dans :
+
+```text
+build/camera_diagnostics
+```
+
 Terminal 1, demarrer Flechette :
 
 ```powershell
@@ -986,6 +1045,12 @@ Terminal 2, lancer le service vision live :
 ```powershell
 cd "C:\Users\pcben\Desktop\nlohmann test"
 .\build\debug\vision_service.exe config\live_windows.json
+```
+
+Ou via le script raccourci :
+
+```powershell
+.\tools\run_live_windows.ps1 -Config config\live_windows.json -Diagnostics
 ```
 
 Terminal 3, verifier puis demarrer :

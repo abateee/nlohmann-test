@@ -68,6 +68,9 @@ if(WIN32)
     target_link_libraries(vision_live_calibrate_ui PRIVATE user32 gdi32)
 endif()
 
+add_executable(vision_camera_diagnostics apps/vision_camera_diagnostics.cpp)
+target_link_libraries(vision_camera_diagnostics PRIVATE visiondarts)
+
 add_executable(visiondarts_tests tests/test_main.cpp)
 target_link_libraries(visiondarts_tests PRIVATE visiondarts)
 
