@@ -1182,3 +1182,272 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/start
 ```
 
 Le service ouvrira les cameras configurees, utilisera les calibrations JSON et publiera les tirs vers l'URL `backend.post_url`.
+
+## 27. Setup complet Windows 3 cameras
+
+Cette procedure est celle a envoyer a une personne qui a 3 cameras USB et veut tester le moteur live Windows depuis GitHub.
+
+### 27.1 Objectif du premier test
+
+Le premier objectif n'est pas encore de valider le scoring complet, mais de verifier que :
+
+- le repo se clone correctement
+- les dependances s'installent
+- le projet compile
+- les 3 cameras sont visibles par Windows/OpenCV
+- une image est capturee pour chaque camera
+- un rapport de diagnostic est produit
+
+### 27.2 Cloner le repo
+
+```powershell
+git clone https://github.com/abateee/nlohmann-test.git
+cd nlohmann-test
+git checkout feature/live-camera-windows
+```
+
+### 27.3 Installer les prerequis
+
+Installer sur Windows :
+
+- Git
+- Visual Studio Build Tools 2022 avec les outils C++
+- CMake
+- Ninja
+- vcpkg
+
+Exemple d'installation vcpkg :
+
+```powershell
+git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+C:\vcpkg\bootstrap-vcpkg.bat
+$env:VCPKG_ROOT="C:\vcpkg"
+```
+
+Si vcpkg est installe ailleurs, adapter `VCPKG_ROOT`.
+
+### 27.4 Verifier l'environnement
+
+Depuis la racine du repo :
+
+```powershell
+.\tools\setup_windows.ps1
+```
+
+Le script doit trouver :
+
+- Visual Studio Build Tools
+- CMake
+- Ninja
+- vcpkg
+- le triplet `x64-windows`
+
+Si les chemins ne sont pas standards :
+
+```powershell
+$env:VISIONDARTS_VSDEVCMD="C:\chemin\vers\VsDevCmd.bat"
+$env:VISIONDARTS_CMAKE="C:\chemin\vers\cmake.exe"
+$env:VCPKG_ROOT="C:\chemin\vers\vcpkg"
+```
+
+### 27.5 Installer les dependances C++
+
+```powershell
+.\tools\setup_windows.ps1 -InstallDeps
+```
+
+Cette commande lance `vcpkg install --triplet x64-windows` pour installer les dependances declarees dans `vcpkg.json`.
+
+### 27.6 Compiler et tester
+
+```powershell
+.\tools\build_debug.ps1 -RunTests
+```
+
+Resultat attendu :
+
+- build OK
+- tests unitaires OK
+- `100% tests passed`
+
+Les executables sont generes dans :
+
+```text
+build/debug
+```
+
+### 27.7 Brancher les 3 cameras
+
+Brancher les 3 cameras USB.
+
+La config fournie suppose :
+
+- `camera_id` 1 -> `device_index` 0
+- `camera_id` 2 -> `device_index` 1
+- `camera_id` 3 -> `device_index` 2
+
+Fichier de config :
+
+```text
+config/live_windows.json
+```
+
+### 27.8 Lancer le diagnostic cameras
+
+```powershell
+.\build\debug\vision_camera_diagnostics.exe config\live_windows.json
+```
+
+Resultat attendu :
+
+- 3 cameras ouvertes
+- 3 frames capturees
+- un rapport JSON genere
+- une image PNG par camera
+
+Sorties :
+
+```text
+build/camera_diagnostics/camera_diagnostics.json
+build/camera_diagnostics/camera-1-device-0.png
+build/camera_diagnostics/camera-2-device-1.png
+build/camera_diagnostics/camera-3-device-2.png
+```
+
+### 27.9 Si les cameras ne sont pas trouvees
+
+Scanner les index OpenCV disponibles :
+
+```powershell
+.\build\debug\vision_camera_diagnostics.exe --scan 10
+```
+
+Puis ouvrir :
+
+```text
+build/camera_diagnostics/camera_diagnostics.json
+```
+
+Identifier les `device_index` qui fonctionnent, puis modifier `config/live_windows.json`.
+
+Exemple :
+
+```json
+{
+  "camera_id": 1,
+  "device_index": 0
+}
+```
+
+Relancer ensuite :
+
+```powershell
+.\build\debug\vision_camera_diagnostics.exe config\live_windows.json
+```
+
+### 27.10 Calibrer les 3 cameras
+
+Quand le diagnostic voit bien les 3 cameras :
+
+```powershell
+.\build\debug\vision_live_calibrate_ui.exe config\live_windows.json --all
+```
+
+Ordre des points a cliquer pour chaque camera :
+
+1. haut double
+2. droite double
+3. bas double
+4. gauche double
+
+Touches dans l'UI :
+
+- clic gauche : ajouter un point
+- `U` : annuler le dernier point
+- `R` : recommencer
+- `S` : sauvegarder quand 4 points sont poses
+- `Q` ou `ESC` : quitter
+
+Fichiers attendus :
+
+```text
+config/calibration-camera-1.json
+config/calibration-camera-2.json
+config/calibration-camera-3.json
+```
+
+Ces fichiers sont locaux et ne doivent pas forcement etre commits.
+
+### 27.11 Lancer le service live
+
+```powershell
+.\build\debug\vision_service.exe config\live_windows.json
+```
+
+Dans un autre PowerShell :
+
+```powershell
+Invoke-RestMethod -Uri http://127.0.0.1:8090/healthcheck
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/start
+```
+
+Arreter :
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/stop
+```
+
+Recapturer une reference :
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8090/commands/reset-reference
+```
+
+### 27.12 Script raccourci
+
+```powershell
+.\tools\run_live_windows.ps1 -Config config\live_windows.json -Diagnostics
+```
+
+Options disponibles :
+
+- `-Build`
+- `-Diagnostics`
+- `-CalibrateAll`
+
+Exemple complet :
+
+```powershell
+.\tools\run_live_windows.ps1 -Build -Diagnostics -CalibrateAll
+```
+
+### 27.13 Integration Flechette
+
+Le service vision publie les tirs vers :
+
+```text
+http://127.0.0.1:3010/vision/events
+```
+
+Cette URL est configuree dans :
+
+```text
+config/live_windows.json
+```
+
+Pour tester avec Flechette :
+
+1. lancer le backend Flechette sur le port `3010`
+2. creer une partie
+3. lancer `vision_service.exe`
+4. appeler `/commands/start`
+5. verifier que les tirs arrivent dans Flechette
+
+### 27.14 Infos a renvoyer apres diagnostic
+
+Demander a la personne de renvoyer :
+
+- `build/camera_diagnostics/camera_diagnostics.json`
+- les images `build/camera_diagnostics/camera-*-device-*.png`
+- le resultat de `Invoke-RestMethod -Uri http://127.0.0.1:8090/healthcheck`
+- toute erreur affichee dans le terminal
