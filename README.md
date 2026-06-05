@@ -623,9 +623,11 @@ config/live_windows.json
 
 La config fournie dans cette branche est prete pour 3 cameras USB Windows :
 
-- camera logique `1` sur `device_index` 0
-- camera logique `2` sur `device_index` 1
-- camera logique `3` sur `device_index` 2
+- camera logique `1` sur `device_index` 1
+- camera logique `2` sur `device_index` 2
+- camera logique `3` sur `device_index` 3
+- `device_index` 0 est laisse de cote dans cette config quand il correspond a une webcam integree
+- backend OpenCV `dshow` force sous Windows pour les webcams USB
 - calibrations separees dans `config/calibration-camera-1.json`, `2` et `3`
 
 Exemple minimal 1 camera :
@@ -650,6 +652,7 @@ Exemple minimal 1 camera :
       "width": 1280,
       "height": 720,
       "fps": 30,
+      "capture_backend": "dshow",
       "calibration_path": "config/calibration-camera-1.json",
       "enabled": true
     }
@@ -675,6 +678,7 @@ Exemple 3 cameras :
       "width": 1280,
       "height": 720,
       "fps": 30,
+      "capture_backend": "dshow",
       "calibration_path": "config/calibration-camera-1.json",
       "enabled": true
     },
@@ -684,6 +688,7 @@ Exemple 3 cameras :
       "width": 1280,
       "height": 720,
       "fps": 30,
+      "capture_backend": "dshow",
       "calibration_path": "config/calibration-camera-2.json",
       "enabled": true
     },
@@ -693,6 +698,7 @@ Exemple 3 cameras :
       "width": 1280,
       "height": 720,
       "fps": 30,
+      "capture_backend": "dshow",
       "calibration_path": "config/calibration-camera-3.json",
       "enabled": true
     }
@@ -718,6 +724,8 @@ Exemple 3 cameras :
   garde-fou pour eviter plusieurs tirs detectes sur le meme changement
 - `cameras[].device_index`
   index OpenCV de la camera USB Windows
+- `cameras[].capture_backend`
+  backend OpenCV a utiliser : `dshow` est recommande sous Windows, `auto` laisse OpenCV choisir, `msmf` active Media Foundation
 - `cameras[].calibration_path`
   fichier JSON lu et ecrit par la calibration live
 - en mode `live`, la config doit avoir entre 1 et 3 cameras actives
@@ -1282,9 +1290,11 @@ Brancher les 3 cameras USB.
 
 La config fournie suppose :
 
-- `camera_id` 1 -> `device_index` 0
-- `camera_id` 2 -> `device_index` 1
-- `camera_id` 3 -> `device_index` 2
+- `camera_id` 1 -> `device_index` 1
+- `camera_id` 2 -> `device_index` 2
+- `camera_id` 3 -> `device_index` 3
+- `device_index` 0 est souvent la webcam integree sur un PC portable
+- `capture_backend` -> `dshow`
 
 Fichier de config :
 
@@ -1329,13 +1339,15 @@ build/camera_diagnostics/camera_diagnostics.json
 ```
 
 Identifier les `device_index` qui fonctionnent, puis modifier `config/live_windows.json`.
+Conserver `"capture_backend": "dshow"` pour les webcams USB Windows, sauf test volontaire d'un autre backend.
 
 Exemple :
 
 ```json
 {
   "camera_id": 1,
-  "device_index": 0
+  "device_index": 0,
+  "capture_backend": "dshow"
 }
 ```
 
