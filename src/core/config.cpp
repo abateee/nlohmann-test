@@ -32,6 +32,11 @@ int enabled_camera_count(const std::vector<LiveCameraConfig>& cameras)
     return count;
 }
 
+bool is_valid_capture_backend(const std::string& capture_backend)
+{
+    return capture_backend == "auto" || capture_backend == "dshow" || capture_backend == "msmf";
+}
+
 void validate_live_config(const AppConfig& config)
 {
     if (config.execution.mode != "live")
@@ -76,6 +81,10 @@ void validate_live_config(const AppConfig& config)
         if (camera.calibration_path.empty())
         {
             throw std::runtime_error("calibration_path live manquant pour camera_id=" + std::to_string(camera.camera_id));
+        }
+        if (!is_valid_capture_backend(camera.capture_backend))
+        {
+            throw std::runtime_error("capture_backend live invalide pour camera_id=" + std::to_string(camera.camera_id));
         }
     }
 }
@@ -125,6 +134,7 @@ void from_json(const nlohmann::json& j, LiveCameraConfig& config)
     config.width = j.value("width", 0);
     config.height = j.value("height", 0);
     config.fps = j.value("fps", 0);
+    config.capture_backend = j.value("capture_backend", config.capture_backend);
     config.calibration_path = j.value("calibration_path", std::string{"config/calibration-camera-1.json"});
     config.enabled = j.value("enabled", true);
     if (j.contains("mask"))

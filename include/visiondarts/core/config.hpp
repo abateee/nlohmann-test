@@ -53,6 +53,11 @@ struct LiveCameraConfig
     int width = 0;
     int height = 0;
     int fps = 0;
+#ifdef _WIN32
+    std::string capture_backend = "dshow";
+#else
+    std::string capture_backend = "auto";
+#endif
     std::filesystem::path calibration_path = "config/calibration-camera-1.json";
     bool enabled = true;
     std::optional<MaskCircle> mask;

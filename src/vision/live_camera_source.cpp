@@ -5,6 +5,23 @@
 
 namespace visiondarts
 {
+int opencv_capture_backend(const std::string& capture_backend)
+{
+    if (capture_backend == "auto")
+    {
+        return cv::CAP_ANY;
+    }
+    if (capture_backend == "dshow")
+    {
+        return cv::CAP_DSHOW;
+    }
+    if (capture_backend == "msmf")
+    {
+        return cv::CAP_MSMF;
+    }
+    throw std::runtime_error("capture_backend inconnu: " + capture_backend);
+}
+
 void LiveCameraSource::open(const std::vector<LiveCameraConfig>& cameras)
 {
     close();
@@ -18,7 +35,7 @@ void LiveCameraSource::open(const std::vector<LiveCameraConfig>& cameras)
 
         CameraHandle handle;
         handle.config = config;
-        if (!handle.capture.open(config.device_index))
+        if (!handle.capture.open(config.device_index, opencv_capture_backend(config.capture_backend)))
         {
             throw std::runtime_error("Impossible d'ouvrir la camera device_index=" + std::to_string(config.device_index));
         }

@@ -218,6 +218,7 @@ void test_live_config_parsing()
                 {"width", 1280},
                 {"height", 720},
                 {"fps", 30},
+                {"capture_backend", "msmf"},
                 {"calibration_path", "config/calibration-camera-2.json"},
                 {"enabled", true},
                 {"mask", {{"center_x", 640}, {"center_y", 360}, {"radius_px", 320}}},
@@ -257,6 +258,7 @@ void test_live_config_parsing()
     expect(live_config.cameras.front().width == 1280, "width live incorrect.");
     expect(live_config.cameras.front().height == 720, "height live incorrect.");
     expect(live_config.cameras.front().fps == 30, "fps live incorrect.");
+    expect(live_config.cameras.front().capture_backend == "msmf", "capture_backend live incorrect.");
     expect(live_config.cameras.front().calibration_path == std::filesystem::path("config/calibration-camera-2.json"), "calibration_path live incorrect.");
     expect(live_config.cameras.front().mask.has_value(), "mask live devrait etre parse.");
     expect(live_config.cameras.front().mask->radius_px == 320, "mask radius live incorrect.");
@@ -305,6 +307,29 @@ void test_live_config_validation()
         too_many_cameras_rejected = true;
     }
     expect(too_many_cameras_rejected, "La config live doit refuser plus de 3 cameras actives.");
+
+    const nlohmann::json invalid_backend_json = {
+        {"execution", {{"mode", "live"}}},
+        {"cameras", nlohmann::json::array({
+            {
+                {"camera_id", 1},
+                {"device_index", 0},
+                {"capture_backend", "unknown"},
+                {"calibration_path", "config/calibration-camera-1.json"},
+            },
+        })},
+    };
+
+    bool invalid_backend_rejected = false;
+    try
+    {
+        (void)invalid_backend_json.get<visiondarts::AppConfig>();
+    }
+    catch (const std::exception&)
+    {
+        invalid_backend_rejected = true;
+    }
+    expect(invalid_backend_rejected, "La config live doit refuser un capture_backend inconnu.");
 }
 
 void test_live_windows_config_file()
@@ -313,11 +338,14 @@ void test_live_windows_config_file()
     expect(config.execution.mode == "live", "config/live_windows.json doit etre en mode live.");
     expect(config.cameras.size() == 3, "config/live_windows.json doit configurer 3 cameras.");
     expect(config.cameras.at(0).camera_id == 1, "La camera 1 live est mal configuree.");
-    expect(config.cameras.at(0).device_index == 0, "Le device_index de la camera 1 est incorrect.");
+    expect(config.cameras.at(0).device_index == 1, "Le device_index de la camera 1 est incorrect.");
+    expect(config.cameras.at(0).capture_backend == "dshow", "La camera 1 live doit utiliser DirectShow sur Windows.");
     expect(config.cameras.at(1).camera_id == 2, "La camera 2 live est mal configuree.");
-    expect(config.cameras.at(1).device_index == 1, "Le device_index de la camera 2 est incorrect.");
+    expect(config.cameras.at(1).device_index == 2, "Le device_index de la camera 2 est incorrect.");
+    expect(config.cameras.at(1).capture_backend == "dshow", "La camera 2 live doit utiliser DirectShow sur Windows.");
     expect(config.cameras.at(2).camera_id == 3, "La camera 3 live est mal configuree.");
-    expect(config.cameras.at(2).device_index == 2, "Le device_index de la camera 3 est incorrect.");
+    expect(config.cameras.at(2).device_index == 3, "Le device_index de la camera 3 est incorrect.");
+    expect(config.cameras.at(2).capture_backend == "dshow", "La camera 3 live doit utiliser DirectShow sur Windows.");
 }
 
 void test_json_subset()

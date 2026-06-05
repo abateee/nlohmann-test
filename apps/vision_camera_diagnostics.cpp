@@ -12,6 +12,7 @@
 #include <opencv2/videoio.hpp>
 
 #include "visiondarts/core/config.hpp"
+#include "visiondarts/vision/live_camera_source.hpp"
 
 namespace
 {
@@ -22,6 +23,7 @@ struct CameraProbe
     int requested_width = 0;
     int requested_height = 0;
     int requested_fps = 0;
+    std::string capture_backend;
     bool configured = false;
     bool opened = false;
     bool frame_captured = false;
@@ -67,12 +69,13 @@ CameraProbe probe_camera(
     probe.requested_width = config.width;
     probe.requested_height = config.height;
     probe.requested_fps = config.fps;
+    probe.capture_backend = config.capture_backend;
     probe.configured = configured;
 
     try
     {
         cv::VideoCapture capture;
-        if (!capture.open(config.device_index))
+        if (!capture.open(config.device_index, visiondarts::opencv_capture_backend(config.capture_backend)))
         {
             probe.error = "open_failed";
             return probe;
@@ -142,6 +145,7 @@ nlohmann::json to_json(const CameraProbe& probe)
         {"requested_width", probe.requested_width},
         {"requested_height", probe.requested_height},
         {"requested_fps", probe.requested_fps},
+        {"capture_backend", probe.capture_backend},
         {"actual_width", probe.actual_width},
         {"actual_height", probe.actual_height},
         {"actual_fps", probe.actual_fps},
@@ -157,6 +161,7 @@ void print_probe(const CameraProbe& probe)
     {
         std::cout << " camera_id=" << probe.camera_id;
     }
+    std::cout << " backend=" << probe.capture_backend;
     std::cout << " opened=" << (probe.opened ? "yes" : "no")
               << " frame=" << (probe.frame_captured ? "yes" : "no");
     if (probe.actual_width > 0 && probe.actual_height > 0)

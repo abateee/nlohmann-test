@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include <opencv2/core.hpp>
@@ -14,6 +15,8 @@ struct LiveCameraFrame
     LiveCameraConfig config{};
     cv::Mat image;
 };
+
+int opencv_capture_backend(const std::string& capture_backend);
 
 class LiveCameraSource
 {
