@@ -12,8 +12,8 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
-        "CMAKE_PREFIX_PATH": "$env{VCPKG_ROOT}/installed/x64-windows",
-        "OpenCV_DIR": "$env{VCPKG_ROOT}/installed/x64-windows/share/opencv4"
+        "CMAKE_PREFIX_PATH": "${sourceDir}/vcpkg_installed/x64-windows",
+        "OpenCV_DIR": "${sourceDir}/vcpkg_installed/x64-windows/share/opencv4"
       }
     },
     {

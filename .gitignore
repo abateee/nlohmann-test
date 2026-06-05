@@ -1,6 +1,7 @@
 # Build outputs
 /build/
 /out/
+/vcpkg_installed/
 
 # Runtime/debug outputs
 *.exe

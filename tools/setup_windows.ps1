@@ -75,11 +75,11 @@ if (-not $VcpkgRoot) {
     Write-Host "[KO] VCPKG_ROOT pointe vers un dossier introuvable: $VcpkgRoot"
 }
 
-$installedDir = if ($VcpkgRoot) { Join-Path $VcpkgRoot "installed\$Triplet" } else { $null }
-if ($installedDir -and (Test-Path $installedDir)) {
-    Write-Host "[OK] vcpkg triplet: $installedDir"
+$manifestInstalledDir = Join-Path $projectRoot "vcpkg_installed\$Triplet"
+if (Test-Path $manifestInstalledDir) {
+    Write-Host "[OK] vcpkg manifest triplet: $manifestInstalledDir"
 } else {
-    Write-Host "[KO] vcpkg triplet introuvable: $installedDir"
+    Write-Host "[KO] vcpkg manifest triplet introuvable: $manifestInstalledDir"
 }
 
 if ($InstallDeps) {
